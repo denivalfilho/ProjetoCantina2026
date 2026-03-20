@@ -23,15 +23,25 @@ class Estoque:
 
     def vender(self, nome_procurado):
         atual = self.inicio
+        anterior = None
+        
         while atual is not None:
             if atual.nome == nome_procurado:
                 if atual.quantidade > 0:
-                    atual.quantidade = atual.quantidade - 1
+                    atual.quantidade -= 1
+                    
+                    if atual.quantidade == 0:
+                        if anterior is None:
+                            self.inicio = atual.proximo
+                        else:
+                            anterior.proximo = atual.proximo
+                            
                     return atual
-                else:
-                    print("Erro: Produto", nome_procurado, "esta esgotado!")
-                    return None
+            
+            anterior = atual
             atual = atual.proximo
+            
+        print("Erro: Produto", nome_procurado, "nao encontrado ou esgotado")
         return None
 
     def editar_quantidade(self, nome_procurado, nova_qtd):
@@ -41,23 +51,24 @@ class Estoque:
                 atual.quantidade = nova_qtd
                 return atual
             atual = atual.proximo
-        print("Erro: Produto nao encontrado para editar")
         return None
 
 cantina = Estoque()
 
-item1 = ItemEstoque("Coxinha", 3.50, 6.00, "15/03", "18/03", 20)
+lote1 = ItemEstoque("Coxinha", 3.50, 6.00, "10/03", "12/03", 1)
+lote2 = ItemEstoque("Coxinha", 3.50, 6.00, "15/03", "20/03", 10)
 item2 = ItemEstoque("Suco", 2.00, 4.50, "15/03", "20/03", 15)
-item3 = ItemEstoque("Chocolate", 1.50, 3.00, "15/03", "15/12", 50)
 
-cantina.adicionar(item1)
+cantina.adicionar(lote1)
+cantina.adicionar(lote2)
 cantina.adicionar(item2)
-cantina.adicionar(item3)
 
-print("Quantidade de Coxinha antes:", item1.quantidade)
+print("Venda 1 (Lote 1):")
+v1 = cantina.vender("Coxinha")
+print("Vendido:", v1.nome, "| Validade:", v1.data_vencimento)
 
-cantina.vender("Coxinha")
-print("Quantidade apos vender uma unidade:", item1.quantidade)
+print("Venda 2 (Lote 2 - o sistema pulou o lote 1 que zerou):")
+v2 = cantina.vender("Coxinha")
+print("Vendido:", v2.nome, "| Validade:", v2.data_vencimento)
 
-cantina.editar_quantidade("Coxinha", 100)
-print("Quantidade apos editar para 100:", item1.quantidade)
+print("Primeiro da lista agora:", cantina.inicio.nome)
