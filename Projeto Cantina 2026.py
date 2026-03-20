@@ -8,17 +8,30 @@ class ItemEstoque:
         self.quantidade = quantidade
         self.proximo = None 
 
+class Estoque:
+    def __init__(self):
+        self.inicio = None
+
+    def adicionar(self, novo_item):
+        if self.inicio is None:
+            self.inicio = novo_item
+        else:
+            atual = self.inicio
+            while atual.proximo is not None:
+                atual = atual.proximo
+            atual.proximo = novo_item
+
+cantina = Estoque()
+
 item1 = ItemEstoque("Coxinha", 3.50, 6.00, "15/03", "18/03", 20)
 item2 = ItemEstoque("Suco", 2.00, 4.50, "15/03", "20/03", 15)
 item3 = ItemEstoque("Chocolate", 1.50, 3.00, "15/03", "15/12", 50)
 
-item1.proximo = item2 
-item2.proximo = item3
+cantina.adicionar(item1)
+cantina.adicionar(item2)
+cantina.adicionar(item3)
 
 print("Teste")
-print(item1.nome)
-print(item1.proximo)
-print(item1.proximo.nome)
-print(item2.nome)
-print(item1.proximo.proximo.nome)
-print(item3.proximo)
+print("Primeiro item:", cantina.inicio.nome)
+print("Segundo item:", cantina.inicio.proximo.nome)
+print("Terceiro item:", cantina.inicio.proximo.proximo.nome)
