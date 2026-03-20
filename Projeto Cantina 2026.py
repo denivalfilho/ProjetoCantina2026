@@ -25,9 +25,23 @@ class Estoque:
         atual = self.inicio
         while atual is not None:
             if atual.nome == nome_procurado:
-                atual.quantidade = atual.quantidade - 1
+                if atual.quantidade > 0:
+                    atual.quantidade = atual.quantidade - 1
+                    return atual
+                else:
+                    print("Erro: Produto", nome_procurado, "esta esgotado!")
+                    return None
+            atual = atual.proximo
+        return None
+
+    def editar_quantidade(self, nome_procurado, nova_qtd):
+        atual = self.inicio
+        while atual is not None:
+            if atual.nome == nome_procurado:
+                atual.quantidade = nova_qtd
                 return atual
             atual = atual.proximo
+        print("Erro: Produto nao encontrado para editar")
         return None
 
 cantina = Estoque()
@@ -40,15 +54,10 @@ cantina.adicionar(item1)
 cantina.adicionar(item2)
 cantina.adicionar(item3)
 
-print("Quantidade inicial de Coxinha:", item1.quantidade)
-print("Quantidade inicial de Suco:", item2.quantidade)
+print("Quantidade de Coxinha antes:", item1.quantidade)
 
-venda1 = cantina.vender("Coxinha")
-venda2 = cantina.vender("Suco")
+cantina.vender("Coxinha")
+print("Quantidade apos vender uma unidade:", item1.quantidade)
 
-print("Item vendido:", venda1.nome)
-print("Nova quantidade de Coxinha:", item1.quantidade)
-print("Item vendido:", venda2.nome)
-print("Nova quantidade de Suco:", item2.quantidade)
-
-print("Primeiro item da lista permanece:", cantina.inicio.nome)
+cantina.editar_quantidade("Coxinha", 100)
+print("Quantidade apos editar para 100:", item1.quantidade)
