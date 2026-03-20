@@ -21,14 +21,14 @@ class Estoque:
                 atual = atual.proximo
             atual.proximo = novo_item
 
-    def vender(self):
-        if self.inicio is None:
-            print("Erro: Estoque vazio")
-            return None
-        else:
-            item_vendido = self.inicio
-            self.inicio = self.inicio.proximo
-            return item_vendido
+    def vender(self, nome_procurado):
+        atual = self.inicio
+        while atual is not None:
+            if atual.nome == nome_procurado:
+                atual.quantidade = atual.quantidade - 1
+                return atual
+            atual = atual.proximo
+        return None
 
 cantina = Estoque()
 
@@ -40,10 +40,15 @@ cantina.adicionar(item1)
 cantina.adicionar(item2)
 cantina.adicionar(item3)
 
-print("Teste de Venda")
-print("Primeiro antes da venda:", cantina.inicio.nome)
+print("Quantidade inicial de Coxinha:", item1.quantidade)
+print("Quantidade inicial de Suco:", item2.quantidade)
 
-venda = cantina.vender()
+venda1 = cantina.vender("Coxinha")
+venda2 = cantina.vender("Suco")
 
-print("Item que saiu:", venda.nome)
-print("Novo primeiro item:", cantina.inicio.nome)
+print("Item vendido:", venda1.nome)
+print("Nova quantidade de Coxinha:", item1.quantidade)
+print("Item vendido:", venda2.nome)
+print("Nova quantidade de Suco:", item2.quantidade)
+
+print("Primeiro item da lista permanece:", cantina.inicio.nome)
