@@ -24,28 +24,16 @@ class Estoque:
     def vender(self, nome_procurado):
         atual = self.inicio
         anterior = None
-        
         while atual is not None:
             if atual.nome == nome_procurado and atual.quantidade > 0:
                 atual.quantidade -= 1
-                
                 if atual.quantidade == 0:
                     if anterior is None:
                         self.inicio = atual.proximo
                     else:
                         anterior.proximo = atual.proximo
                 return atual
-            
             anterior = atual
-            atual = atual.proximo
-        return None
-
-    def editar_quantidade(self, nome_procurado, nova_qtd):
-        atual = self.inicio
-        while atual is not None:
-            if atual.nome == nome_procurado:
-                atual.quantidade = nova_qtd
-                return atual
             atual = atual.proximo
         return None
 
@@ -71,21 +59,23 @@ class HistoricoVendas:
                 atual = atual.proximo
             atual.proximo = novo_pagamento
 
+    def gerar_extrato(self, filtro_categoria=None):
+        atual = self.inicio
+        print("--- EXTRATO DE PAGAMENTOS ---")
+        while atual is not None:
+            if filtro_categoria is None or atual.categoria == filtro_categoria:
+                print(f"Pagador: {atual.pagador} | Cat: {atual.categoria} | Curso: {atual.curso} | Valor: R$ {atual.valor}")
+            atual = atual.proximo
+
 cantina = Estoque()
 historico = HistoricoVendas()
 
-lote1 = ItemEstoque("Coxinha", 3.50, 6.00, "10/03", "12/03", 1)
-item2 = ItemEstoque("Suco", 2.00, 4.50, "15/03", "20/03", 15)
-cantina.adicionar(lote1)
-cantina.adicionar(item2)
+item1 = ItemEstoque("Coxinha", 3.50, 6.00, "15/03", "18/03", 10)
+cantina.adicionar(item1)
 
-print("--- Realizando Venda ---")
-item_vendido = cantina.vender("Coxinha")
+venda = cantina.vender("Coxinha")
+if venda:
+    p1 = Pagamento("Maria", "Professor", "ESG", venda.preco_venda, "22/03 15:30")
+    historico.registrar_pagamento(p1)
 
-if item_vendido:
-    novo_pago = Pagamento("Jose", "Aluno", "IA", item_vendido.preco_venda, "22/03 15:00")
-    historico.registrar_pagamento(novo_pago)
-    print("Venda registrada para:", historico.inicio.pagador)
-    print("Valor pago: R$", historico.inicio.valor)
-
-print("Quantidade de Coxinha no estoque apos venda:", lote1.quantidade)
+historico.gerar_extrato()
