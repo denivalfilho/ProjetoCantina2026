@@ -26,22 +26,18 @@ class Estoque:
         anterior = None
         
         while atual is not None:
-            if atual.nome == nome_procurado:
-                if atual.quantidade > 0:
-                    atual.quantidade -= 1
-                    
-                    if atual.quantidade == 0:
-                        if anterior is None:
-                            self.inicio = atual.proximo
-                        else:
-                            anterior.proximo = atual.proximo
-                            
-                    return atual
+            if atual.nome == nome_procurado and atual.quantidade > 0:
+                atual.quantidade -= 1
+                
+                if atual.quantidade == 0:
+                    if anterior is None:
+                        self.inicio = atual.proximo
+                    else:
+                        anterior.proximo = atual.proximo
+                return atual
             
             anterior = atual
             atual = atual.proximo
-            
-        print("Erro: Produto", nome_procurado, "nao encontrado ou esgotado")
         return None
 
     def editar_quantidade(self, nome_procurado, nova_qtd):
@@ -53,22 +49,43 @@ class Estoque:
             atual = atual.proximo
         return None
 
+class Pagamento:
+    def __init__(self, pagador, categoria, curso, valor, data_hora):
+        self.pagador = pagador
+        self.categoria = categoria
+        self.curso = curso
+        self.valor = valor
+        self.data_hora = data_hora
+        self.proximo = None
+
+class HistoricoVendas:
+    def __init__(self):
+        self.inicio = None
+
+    def registrar_pagamento(self, novo_pagamento):
+        if self.inicio is None:
+            self.inicio = novo_pagamento
+        else:
+            atual = self.inicio
+            while atual.proximo is not None:
+                atual = atual.proximo
+            atual.proximo = novo_pagamento
+
 cantina = Estoque()
+historico = HistoricoVendas()
 
 lote1 = ItemEstoque("Coxinha", 3.50, 6.00, "10/03", "12/03", 1)
-lote2 = ItemEstoque("Coxinha", 3.50, 6.00, "15/03", "20/03", 10)
 item2 = ItemEstoque("Suco", 2.00, 4.50, "15/03", "20/03", 15)
-
 cantina.adicionar(lote1)
-cantina.adicionar(lote2)
 cantina.adicionar(item2)
 
-print("Venda 1 (Lote 1):")
-v1 = cantina.vender("Coxinha")
-print("Vendido:", v1.nome, "| Validade:", v1.data_vencimento)
+print("--- Realizando Venda ---")
+item_vendido = cantina.vender("Coxinha")
 
-print("Venda 2 (Lote 2 - o sistema pulou o lote 1 que zerou):")
-v2 = cantina.vender("Coxinha")
-print("Vendido:", v2.nome, "| Validade:", v2.data_vencimento)
+if item_vendido:
+    novo_pago = Pagamento("Jose", "Aluno", "IA", item_vendido.preco_venda, "22/03 15:00")
+    historico.registrar_pagamento(novo_pago)
+    print("Venda registrada para:", historico.inicio.pagador)
+    print("Valor pago: R$", historico.inicio.valor)
 
-print("Primeiro da lista agora:", cantina.inicio.nome)
+print("Quantidade de Coxinha no estoque apos venda:", lote1.quantidade)
