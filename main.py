@@ -2,47 +2,79 @@ from classes import ItemEstoque, Estoque, Pagamento, HistoricoVendas
 from faker import Faker
 import random
 
+# --- CONFIGURAÇÕES INICIAIS ---
+# Inicializa o Faker para gerar nomes brasileiros
 fake = Faker('pt_BR')
+
+# Instancia as classes da nossa estrutura de dados
 cantina = Estoque()
 historico = HistoricoVendas()
 
+# --- FUNÇÃO PARA O FAKER (DADOS DE TESTE) ---
 def gerar_dados_teste():
-    produtos = ["Coxinha", "Suco", "Cafe"]
+    produtos_teste = ["Coxinha", "Suco", "Pao de Queijo", "Cafe"]
+    
+    print("\n>>> Gerando 5 vendas automaticas com nomes aleatorios...")
+    
     for i in range(5):
-        nome_sorteado = random.choice(produtos)
-        # Cria o item e coloca no estoque
-        item = ItemEstoque(nome_sorteado, 3.0, 5.0, "24/03", "30/03", 10)
-        cantina.adicionar(item)
+        nome_prod = random.choice(produtos_teste)
         
-        # Realiza a venda usando o Faker para o nome do aluno
-        venda = cantina.vender(nome_sorteado)
+        # 1. Adiciona um item ao estoque (Preço fixo para o teste)
+        novo_item = ItemEstoque(nome_prod, 2.50, 5.00, "24/03", "30/03", 10)
+        cantina.adicionar(novo_item)
+        
+        # 2. Tenta realizar a venda
+        venda = cantina.vender(nome_prod)
+        
         if venda:
-            pago = Pagamento(fake.name(), "Aluno", "ADS", venda.nome, venda.preco_venda, "24/03 10:00")
+            # Aqui entra o Faker criando o nome do Aluno
+            nome_aluno = fake.name()
+            
+            pago = Pagamento(
+                nome_aluno, 
+                "Aluno", 
+                "ADS", 
+                venda.nome, 
+                venda.preco_venda, 
+                "24/03 10:30"
+            )
             historico.adicionar_pagamento(pago)
-    print(">>> 5 Vendas geradas com sucesso!")
+            print(f"Venda registrada para: {nome_aluno}")
 
+# --- MENU PRINCIPAL ---
 while True:
-    print("\n--- MENU DA CANTINA ---")
+    print("\n" + "="*30)
+    print("      SISTEMA CANTINA FATEC")
+    print("="*30)
     print("1. Cadastrar Produto (Manual)")
-    print("2. Gerar Teste (Faker)")
+    print("2. Gerar 5 Vendas (Faker - Automatico)")
     print("3. Ver Relatorio de Vendas")
     print("4. Sair")
+    print("="*30)
     
-    opcao = input("Escolha: ")
+    opcao = input("Escolha uma opcao: ")
 
     if opcao == "1":
-        nome = input("Nome: ")
-        qtd = int(input("Quantidade: "))
-        novo = ItemEstoque(nome, 3.0, 5.0, "24/03", "30/03", qtd)
-        cantina.adicionar(novo)
-        print("Produto adicionado!")
+        print("\n--- Cadastro Manual ---")
+        nome = input("Nome do Produto: ")
+        qtd = int(input("Quantidade inicial: "))
+        
+        # Cria e adiciona na lista encadeada de estoque
+        item = ItemEstoque(nome, 3.0, 6.0, "24/03", "30/03", qtd)
+        cantina.adicionar(item)
+        print(f"Sucesso: {nome} adicionado ao estoque!")
 
     elif opcao == "2":
+        # Chama a função que usa a biblioteca Faker
         gerar_dados_teste()
 
     elif opcao == "3":
+        print("\n--- Relatorio de Consumo ---")
         historico.relatorio_consumo()
 
     elif opcao == "4":
-        print("Saindo...")
+        print("Saindo do sistema... Ate logo!")
         break
+    
+    else:
+        print("Opcao invalida! Tente novamente.")
