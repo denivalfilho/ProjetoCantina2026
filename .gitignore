@@ -1,14 +1,19 @@
-# Ambientes Virtuais (Pasta pesada com o Python local)
+# Arquivos de Dados (Persistência do Pickle)
+*.dat
+*.pkl
+
+# Ambiente Virtual
 venv/
-ENV/
+.venv/
 env/
 
-# Cache do Python (Arquivos temporários de execução)
+# Arquivos temporários do Python
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
-# Arquivos de sistema (Opcional, mas bom ter)
-.DS_Store
-Thumbs.db
+# Configurações do VS Code
+.vscode/
+
+# Bibliotecas instaladas (sempre use o requirements.txt em vez de subir a pasta)
+lib/
+bin/

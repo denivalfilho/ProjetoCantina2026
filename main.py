@@ -1,56 +1,75 @@
 from classes import ItemEstoque, Estoque, Pagamento, HistoricoVendas
 from faker import Faker
 import random
+import pickle
+import os
 
-# --- CONFIGURAÇÕES INICIAIS ---
-# Inicializa o Faker para gerar nomes brasileiros
+# --- CONFIGURACOES INICIAIS ---
 fake = Faker('pt_BR')
 
-# Instancia as classes da nossa estrutura de dados
-cantina = Estoque()
-historico = HistoricoVendas()
+def salvar_dados(estoque, historico):
+    try:
+        with open('dados_cantina.dat', 'wb') as f:
+            pickle.dump((estoque, historico), f)
+    except Exception as e:
+        print("Erro ao salvar dados: {}".format(e))
 
-# --- FUNÇÃO PARA O FAKER (DADOS DE TESTE) ---
+def carregar_dados():
+    if os.path.exists('dados_cantina.dat'):
+        try:
+            with open('dados_cantina.dat', 'rb') as f:
+                return pickle.load(f)
+        except:
+            return Estoque(), HistoricoVendas()
+    return Estoque(), HistoricoVendas()
+
+# Inicializa o sistema carregando dados salvos (Persistencia)
+cantina, historico = carregar_dados()
+
 def gerar_dados_teste():
     produtos_teste = ["Coxinha", "Suco", "Pao de Queijo", "Cafe"]
-    
-    print("\n>>> Gerando 5 vendas automaticas com nomes aleatorios...")
+    print("\n>>> Gerando 5 vendas automaticas com Faker...")
     
     for i in range(5):
         nome_prod = random.choice(produtos_teste)
         
-        # 1. Adiciona um item ao estoque (Preço fixo para o teste)
+        # Cria item e adiciona ao estoque
+        # ItemEstoque(nome, preco_compra, preco_venda, data_c, data_v, qtd)
         novo_item = ItemEstoque(nome_prod, 2.50, 5.00, "24/03", "30/03", 10)
         cantina.adicionar(novo_item)
         
-        # 2. Tenta realizar a venda
+        # Realiza a venda (diminui estoque e retorna o objeto item)
         venda = cantina.vender(nome_prod)
         
         if venda:
-            # Aqui entra o Faker criando o nome do Aluno
             nome_aluno = fake.name()
-            
+            # Criando o registro de pagamento usando os Getters (Encapsulamento)
             pago = Pagamento(
                 nome_aluno, 
                 "Aluno", 
                 "ADS", 
-                venda.nome, 
-                venda.preco_venda, 
+                venda.get_nome(), 
+                venda.get_preco_venda(), 
                 "24/03 10:30"
             )
             historico.adicionar_pagamento(pago)
-            print(f"Venda registrada para: {nome_aluno}")
+            print("Venda registrada para: {}".format(nome_aluno))
+    
+    # Salva logo apos gerar para garantir a nao volatilidade
+    salvar_dados(cantina, historico)
 
 # --- MENU PRINCIPAL ---
 while True:
-    print("\n" + "="*30)
-    print("      SISTEMA CANTINA FATEC")
-    print("="*30)
-    print("1. Cadastrar Produto (Manual)")
-    print("2. Gerar 5 Vendas (Faker - Automatico)")
-    print("3. Ver Relatorio de Vendas")
-    print("4. Sair")
-    print("="*30)
+    print("\n" + "="*40)
+    print("      SISTEMA GESTOR - CANTINA FATEC")
+    print("="*40)
+    print(" 1. Cadastrar Produto no Estoque (Manual)")
+    print(" 2. Gerar Dados de Teste (Faker + Vendas)")
+    print(" 3. Relatorio de Vendas (Financeiro)")
+    print(" 4. Relatorio de Consumo (Por Cliente)")
+    print(" 5. Recomendacoes da Gestao (Analise)")
+    print(" 6. Sair e Salvar Dados (Pickle)")
+    print("="*40)
     
     opcao = input("Escolha uma opcao: ")
 
@@ -58,22 +77,27 @@ while True:
         print("\n--- Cadastro Manual ---")
         nome = input("Nome do Produto: ")
         qtd = int(input("Quantidade inicial: "))
-        
-        # Cria e adiciona na lista encadeada de estoque
+        # Adiciona na lista encadeada de estoque
         item = ItemEstoque(nome, 3.0, 6.0, "24/03", "30/03", qtd)
         cantina.adicionar(item)
-        print(f"Sucesso: {nome} adicionado ao estoque!")
+        salvar_dados(cantina, historico)
+        print("Sucesso: {} adicionado ao estoque!".format(nome))
 
     elif opcao == "2":
-        # Chama a função que usa a biblioteca Faker
         gerar_dados_teste()
 
     elif opcao == "3":
-        print("\n--- Relatorio de Consumo ---")
-        historico.relatorio_consumo()
+        historico.gerar_extrato()
 
     elif opcao == "4":
-        print("Saindo do sistema... Ate logo!")
+        historico.relatorio_consumo()
+
+    elif opcao == "5":
+        historico.gerar_recomendacoes()
+
+    elif opcao == "6":
+        salvar_dados(cantina, historico)
+        print("Dados salvos em 'dados_cantina.dat'. Ate logo!")
         break
     
     else:
