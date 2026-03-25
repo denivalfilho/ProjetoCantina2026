@@ -77,7 +77,7 @@ while True:
         v = cantina.vender(n)
         if v:
             p = Pagamento(fake.name(), "Aluno", "IA", v.get_nome(), v.get_preco_venda(), "16:00")
-            historico.add_pagamento(p) if hasattr(historico, 'add_pagamento') else historico.adicionar_pagamento(p)
+            historico.add_pagamento(p)
             print("Venda concluida para cliente aleatorio!")
         else:
             print("Erro: Produto sem estoque ou inexistente.")
