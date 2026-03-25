@@ -1,6 +1,5 @@
 class ItemEstoque:
     def __init__(self, nome, preco_compra, preco_venda, data_compra, data_vencimento, quantidade):
-        # Atributos PRIVADOS (Encapsulamento)
         self.__nome = nome
         self.__preco_compra = preco_compra
         self.__preco_venda = preco_venda
@@ -9,7 +8,6 @@ class ItemEstoque:
         self.__quantidade = quantidade
         self.__proximo = None 
 
-    # --- GETTERS E SETTERS ---
     def get_nome(self): return self.__nome
     def get_preco_venda(self): return self.__preco_venda
     def get_quantidade(self): return self.__quantidade
@@ -38,7 +36,6 @@ class Estoque:
                 nova_qtd = atual.get_quantidade() - 1
                 atual.set_quantidade(nova_qtd)
                 
-                # Se zerar o estoque, remove o nó da lista encadeada
                 if atual.get_quantidade() == 0:
                     if anterior is None:
                         self.__inicio = atual.get_proximo()
@@ -59,7 +56,6 @@ class Pagamento:
         self.__data_hora = data_hora
         self.__proximo = None
 
-    # Getters para os relatórios
     def get_pagador(self): return self.__pagador
     def get_item(self): return self.__item
     def get_valor(self): return self.__valor
@@ -117,7 +113,6 @@ class HistoricoVendas:
             print("Sem dados para analise.")
             return
 
-        # Analise de frequencia usando a lista encadeada
         contagem = {}
         atual = self.__inicio
         while atual is not None:
