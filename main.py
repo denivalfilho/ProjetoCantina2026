@@ -6,17 +6,14 @@ import os
 
 fake = Faker('pt_BR')
 
-def salvar_dados(estoque, historico):
-    try:
-        with open('dados_cantina.dat', 'wb') as f:
-            pickle.dump((estoque, historico), f)
-    except Exception as e:
-        print("Erro ao salvar dados: {}".format(e))
+def salvar_dados(est, hist):
+    with open('dados.dat', 'wb') as f:
+        pickle.dump((est, hist), f)
 
 def carregar_dados():
-    if os.path.exists('dados_cantina.dat'):
+    if os.path.exists('dados.dat'):
         try:
-            with open('dados_cantina.dat', 'rb') as f:
+            with open('dados.dat', 'rb') as f:
                 return pickle.load(f)
         except:
             return Estoque(), HistoricoVendas()
@@ -25,69 +22,78 @@ def carregar_dados():
 cantina, historico = carregar_dados()
 
 def gerar_dados_teste():
-    produtos_teste = ["Coxinha", "Suco", "Pao de Queijo", "Cafe"]
-    print("\n>>> Gerando 5 vendas automaticas...")
+    print("Populando sistema automaticamente...")
+    produtos_teste = ["Coxinha", "Suco Laranja", "Cafe Expresso", "Bolo Cenoura"]
+    for nome in produtos_teste:
+        item = ItemEstoque(nome, 3.50, 7.00, "20/03", "30/03", 10)
+        cantina.adicionar(item)
     
-    for i in range(5):
-        nome_prod = random.choice(produtos_teste)
-        novo_item = ItemEstoque(nome_prod, 2.50, 5.00, "24/03", "30/03", 10)
-        cantina.adicionar(novo_item)
-        venda = cantina.vender(nome_prod)
-        
+    for _ in range(3):
+        venda = cantina.vender(random.choice(produtos_teste))
         if venda:
-            nome_aluno = fake.name()
-            pago = Pagamento(
-                nome_aluno, 
-                "Aluno", 
-                "ADS", 
-                venda.get_nome(), 
-                venda.get_preco_venda(), 
-                "24/03 10:30"
-            )
-            historico.adicionar_pagamento(pago)
-            print("Venda registrada para: {}".format(nome_aluno))
-    
-    salvar_dados(cantina, historico)
+            p = Pagamento(fake.name(), "Aluno", random.choice(["IA", "ESG"]), 
+                          venda.get_nome(), venda.get_preco_venda(), "10:30")
+            historico.adicionar_pagamento(p)
+    print("Estoque e Vendas gerados com Faker!")
 
 while True:
-    print("\n" + "="*40)
-    print("      SISTEMA GESTOR - CANTINA FATEC")
-    print("="*40)
-    print(" 1. Cadastrar Produto no Estoque (Manual)")
-    print(" 2. Gerar Dados de Teste (Faker + Vendas)")
-    print(" 3. Relatorio de Vendas (Financeiro)")
-    print(" 4. Relatorio de Consumo (Por Cliente)")
-    print(" 5. Recomendacoes da Gestao (Analise)")
-    print(" 6. Sair e Salvar Dados (Pickle)")
-    print("="*40)
+    print("\n--- SISTEMA GESTOR CANTINA (FATEC) ---")
+    print("1. Cadastrar Produto (Manual Completo)")
+    print("2. Ver Itens no Estoque")
+    print("3. Editar Quantidade (Ajuste)")
+    print("4. Realizar Venda (Cliente via Faker)")
+    print("5. Relatorio Financeiro (Caixa)")
+    print("6. Relatorio de Consumo (Clientes)")
+    print("7. Popular Sistema (Faker - Automatico)")
+    print("8. Sair e Salvar (Pickle)")
     
-    opcao = input("Escolha uma opcao: ")
+    op = input("Escolha uma opcao: ")
 
-    if opcao == "1":
-        print("\n--- Cadastro Manual ---")
-        nome = input("Nome do Produto: ")
-        qtd = int(input("Quantidade inicial: "))
-        item = ItemEstoque(nome, 3.0, 6.0, "24/03", "30/03", qtd)
+    if op == "1":
+        print("\n-- NOVO CADASTRO --")
+        n = input("Nome do Produto: ")
+        pc = float(input("Preco de Compra: "))
+        pv = float(input("Preco de Venda: "))
+        dc = input("Data Compra (dd/mm): ")
+        dv = input("Data Vencimento (dd/mm): ")
+        q = int(input("Quantidade: "))
+        item = ItemEstoque(n, pc, pv, dc, dv, q)
         cantina.adicionar(item)
-        salvar_dados(cantina, historico)
-        print("Sucesso: {} adicionado!".format(nome))
+        print("Produto adicionado ao estoque!")
 
-    elif opcao == "2":
-        gerar_dados_teste()
+    elif op == "2":
+        cantina.relatorio_estoque()
 
-    elif opcao == "3":
+    elif op == "3":
+        n = input("Nome do produto para editar: ")
+        q = int(input("Nova quantidade total: "))
+        if cantina.editar_quantidade_manual(n, q):
+            print("Estoque atualizado!")
+        else:
+            print("Produto nao encontrado.")
+
+    elif op == "4":
+        n = input("Nome do produto vendido: ")
+        v = cantina.vender(n)
+        if v:
+            p = Pagamento(fake.name(), "Aluno", "IA", v.get_nome(), v.get_preco_venda(), "16:00")
+            historico.add_pagamento(p) if hasattr(historico, 'add_pagamento') else historico.adicionar_pagamento(p)
+            print("Venda concluida para cliente aleatorio!")
+        else:
+            print("Erro: Produto sem estoque ou inexistente.")
+
+    elif op == "5":
         historico.gerar_extrato()
 
-    elif opcao == "4":
+    elif op == "6":
         historico.relatorio_consumo()
 
-    elif opcao == "5":
-        historico.gerar_recomendacoes()
+    elif op == "7":
+        gerar_dados_teste()
 
-    elif opcao == "6":
+    elif op == "8":
         salvar_dados(cantina, historico)
-        print("Dados salvos. Ate logo!")
+        print("Saindo... Dados persistidos no arquivo via Pickle.")
         break
-    
     else:
         print("Opcao invalida!")

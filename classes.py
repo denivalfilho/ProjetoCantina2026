@@ -28,14 +28,21 @@ class Estoque:
                 atual = atual.get_proximo()
             atual.set_proximo(novo_item)
 
-    def vender(self, nome_procurado):
+    def editar_quantidade_manual(self, nome, nova_qtd):
+        atual = self.__inicio
+        while atual is not None:
+            if atual.get_nome() == nome:
+                atual.set_quantidade(nova_qtd)
+                return True
+            atual = atual.get_proximo()
+        return False
+
+    def vender(self, nome):
         atual = self.__inicio
         anterior = None
         while atual is not None:
-            if atual.get_nome() == nome_procurado and atual.get_quantidade() > 0:
-                nova_qtd = atual.get_quantidade() - 1
-                atual.set_quantidade(nova_qtd)
-                
+            if atual.get_nome() == nome and atual.get_quantidade() > 0:
+                atual.set_quantidade(atual.get_quantidade() - 1)
                 if atual.get_quantidade() == 0:
                     if anterior is None:
                         self.__inicio = atual.get_proximo()
@@ -45,6 +52,13 @@ class Estoque:
             anterior = atual
             atual = atual.get_proximo()
         return None
+
+    def relatorio_estoque(self):
+        print("LISTA DE ESTOQUE:")
+        atual = self.__inicio
+        while atual is not None:
+            print("Item:", atual.get_nome(), "| Qtd:", atual.get_quantidade())
+            atual = atual.get_proximo()
 
 class Pagamento:
     def __init__(self, pagador, categoria, curso, item, valor, data_hora):
@@ -56,10 +70,9 @@ class Pagamento:
         self.__data_hora = data_hora
         self.__proximo = None
 
-    def get_pagador(self): return self.__pagador
     def get_item(self): return self.__item
     def get_valor(self): return self.__valor
-    def get_data_hora(self): return self.__data_hora
+    def get_pagador(self): return self.__pagador
     def get_proximo(self): return self.__proximo
     def set_proximo(self, prox): self.__proximo = prox
 
@@ -77,49 +90,18 @@ class HistoricoVendas:
             atual.set_proximo(novo)
 
     def gerar_extrato(self):
-        print("\n" + "-"*30)
-        print("   EXTRATO FINANCEIRO")
-        print("-"*30)
+        print("VENDAS REALIZADAS:")
+        total = 0
         atual = self.__inicio
-        if atual is None:
-            print("Nenhuma venda financeira registrada.")
-            return
-        total_caixa = 0
         while atual is not None:
-            print("Item: {} | Valor: R$ {}".format(atual.get_item(), atual.get_valor()))
-            total_caixa += atual.get_valor()
+            print("Produto:", atual.get_item(), "| Valor:", atual.get_valor())
+            total += atual.get_valor()
             atual = atual.get_proximo()
-        print("TOTAL EM CAIXA: R$ {}".format(total_caixa))
+        print("TOTAL EM CAIXA:", total)
 
     def relatorio_consumo(self):
-        print("\n" + "-"*30)
-        print("   RELATORIO DE CONSUMO")
-        print("-"*30)
-        atual = self.__inicio
-        if atual is None:
-            print("Nenhum consumo registrado.")
-            return
-        while atual is not None:
-            print("Cliente: {} | Produto: {} | Hora: {}".format(
-                atual.get_pagador(), atual.get_item(), atual.get_data_hora()
-            ))
-            atual = atual.get_proximo()
-
-    def gerar_recomendacoes(self):
-        print("\n" + "-"*30)
-        print("   RECOMENDACOES GESTORA")
-        print("-"*30)
-        if self.__inicio is None:
-            print("Sem dados para analise.")
-            return
-
-        contagem = {}
+        print("QUEM CONSUMIU:")
         atual = self.__inicio
         while atual is not None:
-            nome_item = atual.get_item()
-            contagem[nome_item] = contagem.get(nome_item, 0) + 1
+            print("Cliente:", atual.get_pagador(), "| Item:", atual.get_item())
             atual = atual.get_proximo()
-        
-        mais_vendido = max(contagem, key=contagem.get)
-        print("Analise: O produto '{}' e o lider de vendas.".format(mais_vendido))
-        print("Recomendacao: Garantir estoque extra de {} para evitar faltas.".format(mais_vendido))
