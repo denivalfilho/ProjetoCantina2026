@@ -23,7 +23,7 @@ cantina, historico = carregar_dados()
 
 def gerar_dados_teste():
     print("Populando sistema automaticamente...")
-    produtos_teste = ["Coxinha", "Suco Laranja", "Cafe Expresso", "Bolo Cenoura"]
+    produtos_teste = ["Coxinha", "Suco", "Cafe", "Bolo"]
     for nome in produtos_teste:
         item = ItemEstoque(nome, 3.50, 7.00, "20/03", "30/03", 10)
         cantina.adicionar(item)
